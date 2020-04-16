@@ -84,17 +84,20 @@ For more information about the preceding procedure, see [Changing the Instance T
    # Install the jq command-line JSON processor.
    sudo yum -y install jq
    
+   # Get the REGION of the envrionment host Amazon EC2 instance.
+   AWS_DEFAULT_REGION=$(curl http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
+   
    # Get the ID of the envrionment host Amazon EC2 instance.
-   INSTANCEID=$(curl http://169.254.169.254/latest/meta-data//instance-id)
+   INSTANCEID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
    
    # Get the ID of the Amazon EBS volume associated with the instance.
-   VOLUMEID=$(aws ec2 describe-instances --instance-id $INSTANCEID | jq -r .Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId)
+   VOLUMEID=$(aws ec2 describe-instances --instance-id $INSTANCEID --region $AWS_DEFAULT_REGION | jq -r .Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId)
    
    # Resize the EBS volume.
-   aws ec2 modify-volume --volume-id $VOLUMEID --size $SIZE
+   aws ec2 modify-volume --volume-id $VOLUMEID --size $SIZE --region $AWS_DEFAULT_REGION
    
    # Wait for the resize to finish.
-   while [ "$(aws ec2 describe-volumes-modifications --volume-id $VOLUMEID --filters Name=modification-state,Values="optimizing","completed" | jq '.VolumesModifications | length')" != "1" ]; do
+   while [ "$(aws ec2 describe-volumes-modifications --volume-id $VOLUMEID --filters Name=modification-state,Values="optimizing","completed" --region $AWS_DEFAULT_REGION | jq '.VolumesModifications | length')" != "1" ]; do
      sleep 1
    done
    
@@ -116,17 +119,20 @@ For more information about the preceding procedure, see [Changing the Instance T
    # Install the jq command-line JSON processor.
    sudo apt install -y jq
    
+   # Get the REGION of the envrionment host Amazon EC2 instance.
+   AWS_DEFAULT_REGION=$(curl http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
+   
    # Get the ID of the envrionment host Amazon EC2 instance.
-   INSTANCEID=$(curl http://169.254.169.254/latest/meta-data//instance-id)
+   INSTANCEID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
    
    # Get the ID of the Amazon EBS volume associated with the instance.
-   VOLUMEID=$(aws ec2 describe-instances --instance-id $INSTANCEID | jq -r .Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId)
+   VOLUMEID=$(aws ec2 describe-instances --instance-id $INSTANCEID --region $AWS_DEFAULT_REGION | jq -r .Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId)
    
    # Resize the EBS volume.
-   aws ec2 modify-volume --volume-id $VOLUMEID --size $SIZE
+   aws ec2 modify-volume --volume-id $VOLUMEID --size $SIZE --region $AWS_DEFAULT_REGION
    
    # Wait for the resize to finish.
-   while [ "$(aws ec2 describe-volumes-modifications --volume-id $VOLUMEID --filters Name=modification-state,Values="optimizing","completed" | jq '.VolumesModifications | length')" != "1" ]; do
+   while [ "$(aws ec2 describe-volumes-modifications --volume-id $VOLUMEID --filters Name=modification-state,Values="optimizing","completed" --region $AWS_DEFAULT_REGION | jq '.VolumesModifications | length')" != "1" ]; do
      sleep 1
    done
    
